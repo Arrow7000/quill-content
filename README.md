@@ -1,6 +1,6 @@
 # Tube Alphabet Exercise
 
-This script implements an algorithm to generate the shortest list of Tube stations that contain every letter of the alphabet. 
+This script implements an algorithm to generate the shortest list of Tube stations that includes every letter of the alphabet. 
 
 ## Instructions
 
