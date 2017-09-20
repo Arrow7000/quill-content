@@ -1,7 +1,3 @@
-/**
- * make distinction between frequency map and score map - very diffferent things!
- */
-
 const { resolve } = require("path");
 const { getCsv } = require("./csv-load");
 const isLetter = require("./is-letter");
@@ -53,12 +49,12 @@ function getLetterScores(words) {
   return scoreMap;
 }
 
-function getWordScores(words, freqMap) {
+function getWordScores(words, letterScoreMap) {
   const wordMap = {};
   for (const word of words) {
     const letters = getLetters(word);
     const wordScore = letters.reduce((total, letter) => {
-      return total + freqMap[letter];
+      return total + letterScoreMap[letter];
     }, 0);
     wordMap[word] = wordScore;
   }
@@ -66,12 +62,12 @@ function getWordScores(words, freqMap) {
   return wordMap;
 }
 
-function getHighestScoring(freqMap) {
+function getHighestScoring(scoreMap) {
   let highScore = 0;
   let highWord = "";
 
-  for (const key in freqMap) {
-    const score = freqMap[key];
+  for (const key in scoreMap) {
+    const score = scoreMap[key];
     if (score > highScore) {
       highScore = score;
       highWord = key;
@@ -80,9 +76,9 @@ function getHighestScoring(freqMap) {
   return highWord;
 }
 
-function allAreZero(freqMap) {
-  for (const key in freqMap) {
-    const score = freqMap[key];
+function allAreZero(scoreMap) {
+  for (const key in scoreMap) {
+    const score = scoreMap[key];
     if (score > 0) return false;
   }
   return true;
@@ -94,17 +90,16 @@ function objFromList(list, toAssignEach) {
   }
 }
 
-function getHighestChain(wordFreqMap, letterFreqMap) {
-  // confusion between letter frequency map and stations
+function getHighestChain(wordScoreMap, letterScoreMap) {
   const list = [];
-  traverser(wordFreqMap, letterFreqMap);
+  traverser(wordScoreMap, letterScoreMap);
 
   return list;
 
-  function traverser(wordFreqMap, letterFreqMap) {
-    if (allAreZero(wordFreqMap)) return;
+  function traverser(wordScoreMap, letterScoreMap) {
+    if (allAreZero(wordScoreMap)) return;
 
-    const highest = getHighestScoring(wordFreqMap);
+    const highest = getHighestScoring(wordScoreMap);
     list.push(highest);
     const usedLetters = getLetters(highest);
     const usedLettersMap = {};
@@ -113,17 +108,17 @@ function getHighestChain(wordFreqMap, letterFreqMap) {
       usedLettersMap[letter] = 0;
     }
 
-    const wordsArray = keysToArray(wordFreqMap);
-    const newLetterFreqMap = { ...letterFreqMap, ...usedLettersMap };
-    const newWordFreqMap = getWordScores(wordsArray, newLetterFreqMap);
-    traverser(newWordFreqMap, newLetterFreqMap);
+    const wordsArray = keysToArray(wordScoreMap);
+    const newLetterScoreMap = { ...letterScoreMap, ...usedLettersMap };
+    const newWordScoreMap = getWordScores(wordsArray, newLetterScoreMap);
+    traverser(newWordScoreMap, newLetterScoreMap);
   }
 }
 
 (async () => {
   const stations = await getStationsFromCsvArray();
-  const freqMap = getLetterScores(stations);
-  const wordMap = getWordScores(stations, freqMap);
-  const list = getHighestChain(wordMap, freqMap);
+  const letterScoreMap = getLetterScores(stations);
+  const wordScoreMap = getWordScores(stations, letterScoreMap);
+  const list = getHighestChain(wordScoreMap, letterScoreMap);
   console.log(list);
 })();
