@@ -2,30 +2,17 @@
  * make distinction between frequency map and score map - very diffferent things!
  */
 
-
+const { resolve } = require("path");
 const { getCsv } = require("./csv-load");
 const isLetter = require("./is-letter");
+const { valsToArray, keysToArray } = require("./helpers");
 
-function valsToArray(obj) {
-  const array = [];
-  for (const key in obj) {
-    const item = obj[key];
-    array.push(item);
-  }
-  return array;
-}
+const filename = "stations.csv";
 
-function keysToArray(obj) {
-  const array = [];
-  for (const key in obj) {
-    array.push(key);
-  }
-  return array;
-}
-
-async function getStations() {
-  const csv = await getCsv("./stations.csv", true);
-  const stations = csv.map(line => line[0]);
+async function getStationsFromCsvArray() {
+  const filePath = resolve(__dirname, filename);
+  const csv = await getCsv(filePath, true);
+  const stations = csv.map(line => line[0]); // station names are in first column of CSV
   return stations;
 }
 
@@ -34,9 +21,7 @@ function getLetters(str) {
   const set = new Set();
   const nonSpaceChars = chars.map(char => char.toLowerCase()).filter(isLetter);
 
-  nonSpaceChars.forEach(char => {
-    set.add(char);
-  });
+  nonSpaceChars.forEach(char => set.add(char));
   return [...set];
 }
 
@@ -124,7 +109,7 @@ function getHighestChain(wordFreqMap, letterFreqMap) {
 }
 
 (async () => {
-  const stations = await getStations();
+  const stations = await getStationsFromCsvArray();
   const freqMap = getLetterScores(stations);
   const wordMap = getWordScores(stations, freqMap);
   const list = getHighestChain(wordMap, freqMap);
