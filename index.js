@@ -25,7 +25,7 @@ function getLetters(str) {
   return [...set];
 }
 
-function getLetterScores(words) {
+function getFrequencyMap(words) {
   const frequencyMap = {};
   for (const word of words) {
     const letters = getLetters(word);
@@ -39,6 +39,18 @@ function getLetterScores(words) {
   }
 
   return frequencyMap;
+}
+
+function getLetterScores(words) {
+  const freqMap = getFrequencyMap(words);
+  const scoreMap = {};
+
+  for (const key in freqMap) {
+    const freqScore = freqMap[key];
+    scoreMap[key] = 1 / freqScore;
+  }
+
+  return scoreMap;
 }
 
 function getWordScores(words, freqMap) {
